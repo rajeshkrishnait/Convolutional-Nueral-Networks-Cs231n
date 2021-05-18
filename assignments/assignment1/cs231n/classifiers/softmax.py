@@ -25,6 +25,9 @@ def softmax_loss_naive(W, X, y, reg):
     # Initialize the loss and gradient to zero.
     loss = 0.0
     dW = np.zeros_like(W)
+    scores = X.dot(W)
+    num_train = X.shape[0]
+    num_classes = W.shape[1]
 
     #############################################################################
     # TODO: Compute the softmax loss and its gradient using explicit loops.     #
@@ -32,11 +35,23 @@ def softmax_loss_naive(W, X, y, reg):
     # here, it is easy to run into numeric instability. Don't forget the        #
     # regularization!                                                           #
     #############################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    # Softmax Loss
+    for i in range(num_train):
+      f = scores[i] - np.max(scores[i]) # avoid numerical instability
+      softmax = np.exp(f)/np.sum(np.exp(f))
+      loss += -np.log(softmax[y[i]])
+      # Weight Gradients
+      for j in range(num_classes):
+        dW[:,j] += X[i] * softmax[j]
+      dW[:,y[i]] -= X[i]
 
-    pass
+    # Average
+    loss /= num_train
+    dW /= num_train
 
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    # Regularization
+    loss += reg * np.sum(W * W)
+    dW += reg * 2 * W 
 
     return loss, dW
 
@@ -58,8 +73,22 @@ def softmax_loss_vectorized(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    num_train = X.shape[0]
+    scores = X.dot(W)
+    scores = scores - np.max(scores, axis=1, keepdims=True)
+    
+    softmax_sum=np.exp(scores).sum(axis=1,keepdims=True)
+    softmax=np.exp(scores)/softmax_sum
+    loss=np.sum(-np.log(softmax[np.arange(num_train),y]))
+    
+    softmax[np.arange(num_train),y]-=1
+    dW=X.T.dot(softmax)
+    
+    loss/=num_train
+    dW/=num_train
 
-    pass
+    loss+=reg*np.sum(W*W)
+    dW+=reg*2*W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
