@@ -52,7 +52,7 @@ def extract_features(imgs, feature_fns, verbose=False):
             next_idx = idx + feature_dim
             imgs_features[i, idx:next_idx] = feature_fn(imgs[i].squeeze())
             idx = next_idx
-        if verbose and i % 1000 == 999:
+        if verbose and i %1000==0:
             print("Done extracting features for %d / %d images" % (i + 1, num_images))
 
     return imgs_features
